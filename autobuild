@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+clear && \
+echo "Please make sure you are in the base directory of the web application you will be building."
+echo "This script will initialize the git repo in the present working directory, initialize npm,"
+echo "then install Gulp, Gulp-Less, Gulp-Watch, Browser-Sync, Bootstrap, and jQuery."
+echo ""
+echo "The present working directory is ${PWD}"
+echo "Type 'y' to continue or 'n' to abort."
+read answer
+#
+
+install_stuff () {
+  git init && \
+  npm init && \
+  npm install --save-dev minimatch && \
+  npm install --save-dev graceful-fs &&\
+  npm install gulp && \
+  npm install --save-dev gulp-less && \
+  npm install gulp-watch && \
+  npm install browser-sync && \
+  npm install --save-dev bootstrap && \
+  npm install --save-dev jquery && \
+  echo "alert('Autobuild successful, enjoy creating your app!');" >> index.js && \
+  echo "@-webkit-viewport{width:device-width}
+@-moz-viewport{width:device-width}
+@-ms-viewport{width:device-width}
+@-o-viewport{width:device-width}
+@viewport{width:device-width}
+
+.jumbotron > h1 {
+    color: green;
+}" >> master.less && \
+  echo "<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv='X-UA-Compatible' content='ie=edge'>
+    <script src='node_modules/jquery/dist/jquery.slim.min.js'></script>
+    <link rel='stylesheet' href='node_modules/bootstrap/dist/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='dist/master.css'>
+    <title>Hello World</title>
+</head>
+<body>
+    <div class='jumbotron'><h1 class='text-center'>Hello World</h1></div>
+    <script src='dist/index.js'></script>
+</body>
+</html>" >> index.html && \
+  echo "var gulp = require('gulp');
+var watch = require('gulp-watch');
+var less = require('gulp-less');
+var browserSync = require('browser-sync').create();
+gulp.task('serve', function () {
+
+    browserSync.init({
+        server: '.'
+    });
+
+    gulp.watch('dist/master.css').on('change', browserSync.reload);
+    gulp.watch('*.html').on('change', browserSync.reload);
+    gulp.watch('dist/index.js').on('change', browserSync.reload);
+});
+
+gulp.task('watch-less', function () {
+    return gulp.src('master.less')
+        .pipe(watch('master.less'))
+        .pipe(less())
+        .pipe(gulp.dest('dist'))
+        .pipe(browserSync.stream());
+});
+
+gulp.task('watch-js', function () {
+    return gulp.src('index.js')
+        .pipe(watch('index.js'))
+        .pipe(gulp.dest('dist'))
+        .pipe(browserSync.stream());
+});
+
+gulp.task('buildShit', ['watch-less', 'watch-js', 'serve'], function () {
+    print('Starting buildShit. File changes will be updated automatically upon save.');
+});" >> gulpfile.js && \
+  git add -A && \
+  git commit -m 'Initial commit - Sets up Gulp, Less, Watch, Browers-Sync, Bootstrap, and jQuery and creates index.html, index.js, and master.less files'
+  code $PWD
+  gulp buildShit
+}
+
+suck () {
+  clear
+  echo "Fine then. I didn't want to install stuff for you anyway."
+}
+
+#
+case "$answer" in
+  "y" | "Y" ) install_stuff ;;
+  "n" | "N" ) suck ;;
+  *) echo "Please choose 'y' or 'n'." ; read answer ;;
+esac
+exit 0
+# end
